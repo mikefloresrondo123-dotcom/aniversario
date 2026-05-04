@@ -21,7 +21,7 @@ body {
     background: black;
     font-family: 'Orbitron', sans-serif;
     color: white;
-    touch-action: none;
+    /* touch-action: none quita el scroll del modal — se maneja por elemento */
 }
 
 /* canvas estrellas */
@@ -261,18 +261,20 @@ h1 {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    /* fondo más oscuro para tapar las órbitas en movimiento */
+    background: rgba(0,0,0,0.82);
     display: none;
     justify-content: center;
     align-items: center;
     z-index: 10;
     padding: 16px;
+    touch-action: pan-y;
 }
 
 #contenido {
-    background: rgba(20,20,20,0.75);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
+    /* fondo sólido para que no se vea la animación detrás */
+    background: rgba(8, 8, 24, 0.97);
+    /* backdrop-filter eliminado: causaba que el fondo en movimiento se viera a través */
     padding: 20px 16px;
     border-radius: 18px;
     text-align: center;
@@ -282,11 +284,13 @@ h1 {
     overflow-y: auto;
     overflow-x: hidden;
     border: 1px solid rgba(0,191,255,0.5);
-    box-shadow: 0 0 20px rgba(0,191,255,0.6);
+    box-shadow: 0 0 25px rgba(0,191,255,0.5), inset 0 0 30px rgba(0,40,80,0.4);
     animation: aparecer 0.35s ease;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     scrollbar-width: thin;
     scrollbar-color: rgba(0,191,255,0.4) transparent;
+    touch-action: pan-y;
 }
 
 #contenido h2 {
@@ -605,6 +609,15 @@ function lanzarConfeti() {
 }
 
 /* ─── MODAL ─── */
+function abrirModal() {
+    const modal = document.getElementById("modal");
+    modal.style.display = "flex";
+    // Pausar órbitas para que no se vean moverse detrás del modal
+    document.querySelectorAll(".orbit").forEach(o => o.style.animationPlayState = "paused");
+    document.querySelector(".sun-corona").style.animationPlayState = "paused";
+    lanzarConfeti();
+}
+
 function mostrar(i) {
     const r = recuerdos[i];
     document.getElementById("titulo").textContent = r.titulo;
@@ -624,8 +637,7 @@ function mostrar(i) {
         galeria.appendChild(img);
     });
 
-    document.getElementById("modal").style.display = "flex";
-    lanzarConfeti();
+    abrirModal();
 }
 
 function mostrarCartaSol() {
@@ -635,12 +647,14 @@ function mostrarCartaSol() {
 
     document.getElementById("corazon-abril").style.display = "none";
     document.getElementById("galeria-imagenes").innerHTML  = "";
-    document.getElementById("modal").style.display = "flex";
-    lanzarConfeti();
+    abrirModal();
 }
 
 function cerrar() {
     document.getElementById("modal").style.display = "none";
+    // Reanudar las animaciones al cerrar
+    document.querySelectorAll(".orbit").forEach(o => o.style.animationPlayState = "running");
+    document.querySelector(".sun-corona").style.animationPlayState = "running";
 }
 
 document.getElementById("btn-cerrar").addEventListener("click", cerrar);
